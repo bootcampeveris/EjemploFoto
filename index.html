@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+ 
+<html>
+ <!--https://github.com/DynamsoftRD/HTML5-Photo-Upload/ -->
+<head>
+ <meta charset="UTF-8">
+    <title>Foto</title>
+ 
+    <script type="text/javascript">
+ //Cuando cambio el estado del boton entra en este metodo
+      function archivoSeleccionado() {
+ 
+        var count = document.getElementById('archivoSubir').files.length;
+ 
+              document.getElementById('detalles').innerHTML = "";
+ 
+              for (var index = 0; index < count; index ++)
+ 
+              {
+                    //Saca los datos a la imagen
+                     var file = document.getElementById('archivoSubir').files[index];
+ 
+                     var fileSize = 0;
+                    //Si es mayor son MB, si es menos son KB
+                     if (file.size > 1024 * 1024)
+ 
+                            fileSize = (Math.round(file.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
+ 
+                     else
+ 
+                            fileSize = (Math.round(file.size * 100 / 1024) / 100).toString() + 'KB';
+                    
+                  
+                  //Muestra en el div detalles, todos los detalles del archivo que queremos subir
+                     document.getElementById('detalles').innerHTML += 'Nombre: ' + file.name + '<br>Tamaño: ' + fileSize + '<br>Tipo: ' + file.type;
+ 
+                     document.getElementById('detalles').innerHTML += '<p>';
+ 
+              }
+ 
+      }
+ 
+      function subirArchivo() {
+         //Da un valor al fichero y hace que se pueda enviar mediante XMLHttpRequest.
+        //https://developer.mozilla.org/es/docs/Web/Guide/Usando_Objetos_FormData
+        var fd = new FormData();
+ 
+              var count = document.getElementById('archivoSubir').files.length;
+ 
+              for (var index = 0; index < count; index ++)
+ 
+              {
+ 
+                     var file = document.getElementById('archivoSubir').files[index];
+                    //Da el nombre de miArchivo a la foto que acabamos de hacer
+                     fd.append('miArchivo', file);
+ 
+              }
+        
+        //Permite enviar solicitudes Http
+        //https://developer.mozilla.org/es/docs/XMLHttpRequest/Using_XMLHttpRequest
+        var xhr = new XMLHttpRequest();
+        //addEventListener registra un evento a un objeto especifico
+        //https://developer.mozilla.org/es/docs/Web/API/EventTarget/addEventListener
+        xhr.upload.addEventListener("progress", subidaEnProceso, false);
+ 
+        xhr.addEventListener("load", subidaCompletada, false);
+ 
+        xhr.addEventListener("error", falloAlSubir, false);
+ 
+        xhr.addEventListener("abort", subidaCancelada, false);
+ 
+        xhr.open("POST", "savetofile.php");
+ 
+        xhr.send(fd);
+ 
+      }
+ 
+      function subidaEnProceso(evt) {
+       //lengthComputable es una propiedad booleana que indica si el evento tiene una longitud que se puede calcular
+       //https://developer.mozilla.org/en-US/docs/Web/API/ProgressEvent/lengthComputable
+        if (evt.lengthComputable) {
+        //https://developer.mozilla.org/en-US/docs/Web/API/ProgressEvent/loaded
+        //https://developer.mozilla.org/en-US/docs/Web/API/ProgressEvent/total
+        //evt.loaded representa la cantidad total realizada
+        //evt.total representa la cantidad total
+          var percentComplete = Math.round(evt.loaded * 100 / evt.total);
+ 
+          document.getElementById('progreso').innerHTML = percentComplete.toString() + '%';
+ 
+        }
+ 
+        else {
+ 
+          document.getElementById('progreso').innerHTML = 'Incapaz de calcular';
+ 
+        }
+ 
+      }
+ 
+      function subidaCompletada(evt) {
+ 
+        //Este evento se genera cuando el servidor envia una respuesta
+        
+        alert(evt.target.responseText);
+ 
+      }
+ 
+      function falloAlSubir(evt) {
+ 
+        alert("Se ha producido un error al intentar cargar el archivo");
+ 
+      }
+ 
+      function subidaCancelada(evt) {
+ 
+        alert("Se ha cancelado la subida del archivo o no tienes internet");
+ 
+      }
+ 
+    </script>
+ 
+</head>
+ 
+<body>
+<!-- http://php.net/manual/es/features.file-upload.post-method.php-->
+<!--enctype="multipart/form-data" solo se puede utilizar con el metodo post y es un tipo de codificacion para que funcione la subida de la imagen --> 
+  <form id="form1" enctype="multipart/form-data" method="post" action="Upload.aspx">
+ 
+    <div>
+ 
+      <label for="archivoSubir">Click en el boton que tienes abajo</label><br />
+ 
+      <input type="file" name="archivoSubir" id="archivoSubir" onchange="archivoSeleccionado();" accept="image/*" capture="camera" />
+ 
+    </div>
+ 
+    <div id="detalles"></div>
+ 
+    <div>
+ 
+      <input type="button" onclick="subirArchivo()" value="Subir" /><br/>
+      
+        <a href="mostrarImagenes.php">Mostrar imagenes</a>
+ 
+    </div>
+ 
+    <div id="progreso"></div>
+ 
+  </form>
+ 
+</body>
+ 
+</html>
